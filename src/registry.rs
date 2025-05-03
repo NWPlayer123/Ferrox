@@ -1,6 +1,8 @@
 use core::ops::Range;
 use std::collections::BTreeMap;
 
+use crate::format::{Segment, ValidSegmentSize};
+
 // TODO: make this less stupid
 #[derive(Clone, Debug)]
 pub enum TypeInfo {
@@ -34,6 +36,33 @@ impl TypeRegistry {
             for (end, type_info) in ranges {
                 if address < *end {
                     results.push(type_info);
+                }
+            }
+        }
+        results
+    }
+}
+
+#[derive(Debug, Default)]
+pub struct DataRegistry<'a, T: ValidSegmentSize> {
+    lookup: BTreeMap<u64, Vec<Segment<'a, T>>>,
+}
+
+impl<'a, T: ValidSegmentSize> DataRegistry<'a, T> {
+    pub fn new() -> Self {
+        Self { lookup: BTreeMap::new() }
+    }
+
+    pub fn get_at_address(&self, address: T, size: T) -> Vec<&'a [u8]> {
+        let mut results = Vec::new();
+        // Get all segments that could possibly overlap with the address we're trying to look up.
+        for (_, ranges) in self.lookup.range(..=address.into()) {
+            for segment in ranges {
+                if address + size <= segment.address + segment.size {
+                    let data_start = (address - segment.address).try_into()?;
+                    let size = size.try_into()?;
+                    results.push(&segment.data[data_start..data_start + size]);
+                    //results.append(segment)
                 }
             }
         }

@@ -15,9 +15,15 @@ pub mod error;
 pub mod format;
 pub mod registry;
 pub mod views;
+pub mod processor;
 
 // TODO: Global `Style`s for text, add CFA to populate, render the loaded file to the assembly view
 
+fn main() {
+    let file = std::fs::File::open("data/main.dol").unwrap();
+}
+
+/*
 // flag this as tokio::main so we can use tokio::spawn inside update()
 #[tokio::main]
 async fn main() -> eframe::Result {
@@ -34,6 +40,7 @@ async fn main() -> eframe::Result {
         Box::new(|_| Ok(Box::new(FerroxApplication::new()))),
     )
 }
+*/
 
 // TODO: make file selector its own view?
 #[derive(Default, PartialEq)]

@@ -18,13 +18,16 @@ mod sealed {
     impl Sealed for u64 {}
 }
 
-pub trait ValidSegmentSize: sealed::Sealed + Copy + Into<u64> {}
+pub trait ValidSegmentSize:
+    sealed::Sealed + Copy + Into<u64> + num_traits::PrimInt + TryInto<usize>
+{
+}
 impl ValidSegmentSize for u16 {}
 impl ValidSegmentSize for u32 {}
 impl ValidSegmentSize for u64 {}
 
 #[derive(Debug)]
-pub struct Segment<T: ValidSegmentSize> {
+pub struct Segment<'a, T: ValidSegmentSize> {
     /// The virtual address this `Segment` starts at
     pub address: T,
     /// The size in bytes that this `Segment` takes up
@@ -34,4 +37,5 @@ pub struct Segment<T: ValidSegmentSize> {
     pub offset: T,
     /// The permissions this `Segment` is tied to
     pub permissions: Permissions,
+    pub data: &'a [u8],
 }
